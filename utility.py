@@ -6,24 +6,22 @@ import tempfile, shutil
 
 def get_input():
     """
-
+    Fetch input from command line. Requests user input for number of rows, columns and zip file path.
     :return:
     """
-    file_path = input('Enter the zip file path')
-    # C:\Users\gaura\OneDrive\Desktop\Grainger\NewTestImages.zip
-    # C:\Users\gaura\OneDrive\Desktop\Grainger\NewTestImages\TestImages.zip
-    num_rows = int(input('Enter number of rows'))
-    num_col = int(input('Enter number of columns'))
+    file_path = input('Enter the zip file path: ')
+    num_rows = int(input('Enter number of rows: '))
+    num_col = int(input('Enter number of columns: '))
     return file_path, num_rows, num_col
 
 
-def validate_input(file_path, num_rows, num_columns):
+def validate_input(file_path, num_rows, num_columns, is_test):
     """
-
+    Calls methods to extract files from the zip folder, gets the file count, matches with user input and returns a boolean.
     :param num_images:
     :param num_rows:
     :param num_columns:
-    :return:
+    :return: A boolean that indicates if the input is valid
     """
     session_dir = tempfile.mkdtemp(dir='static')
     print(session_dir)
@@ -34,10 +32,22 @@ def validate_input(file_path, num_rows, num_columns):
 
     num_images = get_file_count(image_extension, session_dir)
     print('num_images', num_images)
+
+    is_input_valid = num_columns * num_rows == num_images
+
+    if is_test or not is_input_valid:
+        shutil.rmtree(session_dir)
+
     return num_columns * num_rows == num_images
 
 
 def extract_files(file_path, full_session_path):
+    """
+    Extract files from a given zip file and stores in a given local folder
+    :param file_path: Path where the zip file is stored
+    :param full_session_path: Path where the zip file is extracted
+    :return:
+    """
     with zipfile.ZipFile(file_path, "r") as zip_ref:
         print('list of dir', zip_ref.namelist())
 
@@ -47,8 +57,6 @@ def extract_files(file_path, full_session_path):
             if not filename:
                 continue
 
-            # copy file (taken from zipfile's extract)
-            print('member=',member)
             source = zip_ref.open(member)
             target = open(os.path.join(full_session_path, filename), "wb")
             with source, target:
@@ -57,14 +65,12 @@ def extract_files(file_path, full_session_path):
 
 def get_file_extension(full_session_path):
     """
-
-    :param full_session_path:
-    :return:
+    Gets the type of image file contained in the extracted folder
+    :param full_session_path: Local file path where the zip file is stored
+    :return: Returns a string value with image type as jpg, png and so on.
     """
     for root, dirs, files in os.walk(full_session_path):
-        print(files)
         for filename in files:
-            print(filename)
             if filename.endswith('.jpg'):
                 image_type = 'jpg'
             elif filename.endswith('.png'):
@@ -77,9 +83,9 @@ def get_file_extension(full_session_path):
 
 def get_file_count(image_extension, full_session_path):
     """
-
-    :param image_extension:
-    :param full_session_path:
+    Counts the number of files in the extracted zip folder
+    :param image_extension: Type of file stored in the zip folder
+    :param full_session_path: Location of the extracted zip file
     :return:
     """
     number_of_images_in_extracted_zip = len(fnmatch.filter(os.listdir(full_session_path), image_extension))
@@ -88,8 +94,4 @@ def get_file_count(image_extension, full_session_path):
 
 if __name__ == "__main__":
     file_path, num_rows, num_col = get_input()
-    print('file path', file_path)
-    print('num rows', num_rows)
-    print('num col', num_col)
-
-    print(validate_input(file_path, num_rows, num_col))
+    print(validate_input(file_path, num_rows, num_col, False))
