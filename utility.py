@@ -30,15 +30,20 @@ def validate_input(file_path, num_rows, num_columns, is_test):
 
     image_extension = get_file_extension(session_dir)
 
-    num_images = get_file_count(image_extension, session_dir)
-    print('num_images', num_images)
+    print('extension=',image_extension)
 
-    is_input_valid = num_columns * num_rows == num_images
+    if image_extension!=None:
+        num_images = get_file_count(image_extension, session_dir)
+        print('num_images', num_images)
 
-    if is_test or not is_input_valid:
+        is_input_valid = num_columns * num_rows == num_images
+    else:
+        is_input_valid = False
+
+    if is_test or not is_input_valid or image_extension==None:
         shutil.rmtree(session_dir)
 
-    return num_columns * num_rows == num_images
+    return is_input_valid
 
 
 def extract_files(file_path, full_session_path):
@@ -69,6 +74,7 @@ def get_file_extension(full_session_path):
     :param full_session_path: Local file path where the zip file is stored
     :return: Returns a string value with image type as jpg, png and so on.
     """
+    image_type=''
     for root, dirs, files in os.walk(full_session_path):
         for filename in files:
             if filename.endswith('.jpg'):
@@ -77,8 +83,11 @@ def get_file_extension(full_session_path):
                 image_type = 'png'
             break
 
-    image_extension = '*.' + image_type
-    return image_extension
+    if image_type=='':
+        return None
+    else:
+        image_extension = '*.' + image_type
+        return image_extension
 
 
 def get_file_count(image_extension, full_session_path):
