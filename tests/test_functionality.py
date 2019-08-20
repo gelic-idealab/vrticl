@@ -1,4 +1,4 @@
-from utility import utility as u
+from .context import utility as u
 
 
 def test_valid_input():

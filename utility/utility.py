@@ -101,6 +101,8 @@ def get_file_count(image_extension, full_session_path):
     return number_of_images_in_extracted_zip
 
 
+
+
 if __name__ == "__main__":
     file_path, num_rows, num_col = get_input()
-    print(validate_input(file_path, num_rows, num_col, False))
+    validation_result = validate_input(file_path, num_rows, num_col, False)
