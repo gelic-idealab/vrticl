@@ -1,7 +1,6 @@
-import os
 import fnmatch
 import zipfile
-import shutil, uuid, pathlib
+import shutil, uuid, pathlib, glob, os
 from os.path import dirname
 
 
@@ -18,7 +17,7 @@ def get_input():
     return file_path, title, num_rows, num_col
 
 
-def validate_input(image_extension, num_rows, num_columns, session_dir, is_test):
+def validate_input(image_extension, num_rows, num_columns, session_dir):
     """
     Calls methods to extract files from the zip folder, gets the file count, matches with user input and returns a boolean.
     :param num_images:
@@ -44,7 +43,7 @@ def extract_files(file_path, session_dir):
     :param session_dir: Path where the zip file is extracted
     :return:
     """
-    full_session_path = pathlib.Path(session_dir,'static') #,'images'
+    full_session_path = pathlib.Path(session_dir,'static','images')
     print('full_session_path = ',full_session_path)
     os.makedirs(full_session_path)
     with zipfile.ZipFile(file_path, "r") as zip_ref:
@@ -97,8 +96,42 @@ def get_file_count(image_extension, full_session_path):
     return number_of_images_in_extracted_zip
 
 
-def generate_index_html(file_path, title, num_rows, num_col, image_extension, extracted_images_path):
-    f = open(os.path.join(file_path,'helloworld123.html'), 'w')
+def rename_images(grid_row, grid_column, folderPath, image_extension):
+    row_counter = 1
+    column_counter = 1
+    is_incrementing = True
+    for pathAndFilename in glob.iglob(os.path.join(folderPath, image_extension)):
+        title, ext = os.path.splitext(os.path.basename(pathAndFilename))
+        # print('path and file name',pathAndFilename)
+        # print('Test title and ext',title, ext)
+        if row_counter <= int(grid_row):
+            if column_counter <= int(grid_column):
+                os.rename(pathAndFilename,
+                          os.path.join(folderPath, str(row_counter) + '_' + str(column_counter) + ext))
+            if is_incrementing:
+                if row_counter < int(grid_row):
+                    row_counter += 1
+                else:
+                    column_counter += 1
+                    is_incrementing = False
+                    continue
+            else:
+                if row_counter > 1:
+                    row_counter -= 1
+                else:
+                    column_counter += 1
+                    is_incrementing = True
+                    continue
+
+
+def generate_index_html(file_path, title, num_rows, num_col, image_extension):
+    src_files = os.listdir('static')
+    for file_name in src_files:
+        full_file_name = os.path.join('static', file_name)
+        if os.path.isfile(full_file_name):
+            shutil.copy(full_file_name, os.path.join(file_path,'static'))
+
+    f = open(os.path.join(file_path,'index.html'), 'w')
 
     message = """
     <!DOCTYPE html>
@@ -108,10 +141,10 @@ def generate_index_html(file_path, title, num_rows, num_col, image_extension, ex
 <title>"""+title+"""</title>
 <meta name='description' content='360&deg; Image - A-Frame'>
 <!--<script src='https://aframe.io/releases/0.8.0/aframe.min.js'></script>-->
-<script src='https://aframe.io/releases/0.6.0/aframe.min.js'></script>
-<script src='https://npmcdn.com/aframe-animation-component@3.0.1'></script>
+<script src='https://aframe.io/releases/0.9.2/aframe.min.js'></script>
+<!--<script src='https://npmcdn.com/aframe-animation-component@3.0.1'></script>-->
 <script src='https://npmcdn.com/aframe-event-set-component@3.0.1'></script>
-<script src='https://npmcdn.com/aframe-layout-component@3.0.1'></script>
+<!--<script src='https://npmcdn.com/aframe-layout-component@3.0.1'></script>-->
 <script src='https://npmcdn.com/aframe-template-component@3.1.1'></script>
 <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
 <script src='static/assignImageObject.js' type='text/javascript'></script>
@@ -120,8 +153,7 @@ def generate_index_html(file_path, title, num_rows, num_col, image_extension, ex
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 </head>
-<body onload="loadImages("""+str(num_rows)+""","""+str(num_col)+""",'"""+str(extracted_images_path)+"""','"""+image_extension+"""')">
-<!--<a id="redirect_home" href="{{ url_for('main') }}" style="display:none"/>-->
+<body onload="loadImages("""+str(num_rows)+""","""+str(num_col)+""",'static/images','"""+image_extension+"""')">
 
 
 <a-scene>
@@ -185,49 +217,32 @@ def generate_index_html(file_path, title, num_rows, num_col, image_extension, ex
 
 def generate_package_web_tour(file_path, title, num_rows, num_col, is_test):
 
+    # Generate a unique session identifier
     session_identifier = uuid.uuid4()
 
-    current_directory = os.getcwd()
+    # Create a local folder with this unique session identifier
+    session_dir = os.path.join(dirname(os.getcwd()), 'session', str(session_identifier))
+    os.makedirs(os.path.join(session_dir), exist_ok=True)
 
-    print('get current working directory', os.getcwd())
-    print('parent directory = ',dirname(os.getcwd()))
-    os.chdir(dirname(os.getcwd()))
-    print('current directory changed to =',os.getcwd())
-    session_dir_1 = os.path.join(os.getcwd(), 'session_logs')
-
-    # pathlib.Path('session_logs').mkdir(exist_ok=True)
-
-    # pathlib.Path('session_logs', 'test').mkdir(exist_ok=True)
-
-    os.makedirs(os.path.join('session_logs', 'test'), exist_ok=True)
-
-    print('path = ', session_dir_1)
-
-    session_dir = os.path.join(session_dir_1, 'test')
-
-    # os.makedirs(session_dir, exist_ok=True)
-
-    os.chdir(dirname(os.getcwd()))
-
-    print('current directory changed to =', os.getcwd())
-
+    # Extract files to the session identifier directory
     extracted_images_path = extract_files(file_path, session_dir)
+    print('extracted_images_path = ', extracted_images_path)
 
+    # Get the image file extension
     image_extension = get_file_extension(session_dir)
-
     print('extension=', image_extension)
 
-    if is_test or image_extension==None:
+    # Delete files if created for testing or invalid image input
+    if is_test or image_extension is None:
         shutil.rmtree(session_dir)
 
-    validation_result = validate_input(image_extension, num_rows, num_col, session_dir, False)
+    # Check if user input is valid
+    validation_result = validate_input(image_extension, num_rows, num_col, extracted_images_path)
     print('validate result', validation_result)
 
-    if not validation_result:
-        shutil.rmtree(session_dir)
-    else:
-        generate_index_html(session_dir, title, num_rows, num_col, image_extension.split('.')[1], extracted_images_path)
-
+    if validation_result:
+        rename_images(num_rows, num_col, extracted_images_path, image_extension)
+        generate_index_html(session_dir, title, num_rows, num_col, image_extension.split('.')[1])
 
 
 if __name__ == "__main__":
