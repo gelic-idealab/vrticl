@@ -1,7 +1,7 @@
-import os
 import fnmatch
 import zipfile
-import tempfile, shutil
+import shutil, uuid, pathlib, glob, os
+from os.path import dirname
 
 
 def get_input():
@@ -9,13 +9,15 @@ def get_input():
     Fetch input from command line. Requests user input for number of rows, columns and zip file path.
     :return:
     """
+    # C:\Users\gaura\OneDrive\Desktop\Grainger\vrticl_issues\vrticl\tests\images_with_directory.zip
     file_path = input('Enter the zip file path: ')
+    title = input('Enter the title for the web tour: ')
     num_rows = int(input('Enter number of rows: '))
     num_col = int(input('Enter number of columns: '))
-    return file_path, num_rows, num_col
+    return file_path, title, num_rows, num_col
 
 
-def validate_input(file_path, num_rows, num_columns, is_test):
+def validate_input(image_extension, num_rows, num_columns, session_dir):
     """
     Calls methods to extract files from the zip folder, gets the file count, matches with user input and returns a boolean.
     :param num_images:
@@ -23,15 +25,6 @@ def validate_input(file_path, num_rows, num_columns, is_test):
     :param num_columns:
     :return: A boolean that indicates if the input is valid
     """
-    session_dir = tempfile.mkdtemp(dir='static')
-    print(session_dir)
-
-    extract_files(file_path, session_dir)
-
-    image_extension = get_file_extension(session_dir)
-
-    print('extension=',image_extension)
-
     if image_extension!=None:
         num_images = get_file_count(image_extension, session_dir)
         print('num_images', num_images)
@@ -40,19 +33,19 @@ def validate_input(file_path, num_rows, num_columns, is_test):
     else:
         is_input_valid = False
 
-    if is_test or not is_input_valid or image_extension==None:
-        shutil.rmtree(session_dir)
-
     return is_input_valid
 
 
-def extract_files(file_path, full_session_path):
+def extract_files(file_path, session_dir):
     """
     Extract files from a given zip file and stores in a given local folder
     :param file_path: Path where the zip file is stored
-    :param full_session_path: Path where the zip file is extracted
+    :param session_dir: Path where the zip file is extracted
     :return:
     """
+    full_session_path = pathlib.Path(session_dir,'static','images')
+    print('full_session_path = ',full_session_path)
+    os.makedirs(full_session_path)
     with zipfile.ZipFile(file_path, "r") as zip_ref:
         print('list of dir', zip_ref.namelist())
 
@@ -62,10 +55,12 @@ def extract_files(file_path, full_session_path):
             if not filename:
                 continue
 
+            print("Trying to open: %s" % (os.path.join(full_session_path, filename)))
             source = zip_ref.open(member)
             target = open(os.path.join(full_session_path, filename), "wb")
             with source, target:
                 shutil.copyfileobj(source, target)
+    return full_session_path
 
 
 def get_file_extension(full_session_path):
@@ -101,8 +96,155 @@ def get_file_count(image_extension, full_session_path):
     return number_of_images_in_extracted_zip
 
 
+def rename_images(grid_row, grid_column, folderPath, image_extension):
+    row_counter = 1
+    column_counter = 1
+    is_incrementing = True
+    for pathAndFilename in glob.iglob(os.path.join(folderPath, image_extension)):
+        title, ext = os.path.splitext(os.path.basename(pathAndFilename))
+        # print('path and file name',pathAndFilename)
+        # print('Test title and ext',title, ext)
+        if row_counter <= int(grid_row):
+            if column_counter <= int(grid_column):
+                os.rename(pathAndFilename,
+                          os.path.join(folderPath, str(row_counter) + '_' + str(column_counter) + ext))
+            if is_incrementing:
+                if row_counter < int(grid_row):
+                    row_counter += 1
+                else:
+                    column_counter += 1
+                    is_incrementing = False
+                    continue
+            else:
+                if row_counter > 1:
+                    row_counter -= 1
+                else:
+                    column_counter += 1
+                    is_incrementing = True
+                    continue
+
+
+def generate_index_html(file_path, title, num_rows, num_col, image_extension):
+    src_files = os.listdir('static')
+    for file_name in src_files:
+        full_file_name = os.path.join('static', file_name)
+        if os.path.isfile(full_file_name):
+            shutil.copy(full_file_name, os.path.join(file_path,'static'))
+
+    f = open(os.path.join(file_path,'index.html'), 'w')
+
+    message = """
+    <!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>"""+title+"""</title>
+<meta name='description' content='360&deg; Image - A-Frame'>
+<!--<script src='https://aframe.io/releases/0.8.0/aframe.min.js'></script>-->
+<script src='https://aframe.io/releases/0.9.2/aframe.min.js'></script>
+<!--<script src='https://npmcdn.com/aframe-animation-component@3.0.1'></script>-->
+<script src='https://npmcdn.com/aframe-event-set-component@3.0.1'></script>
+<!--<script src='https://npmcdn.com/aframe-layout-component@3.0.1'></script>-->
+<script src='https://npmcdn.com/aframe-template-component@3.1.1'></script>
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+<script src='static/assignImageObject.js' type='text/javascript'></script>
+<script src='static/setImage.js' type='text/javascript'></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</head>
+<body onload="loadImages("""+str(num_rows)+""","""+str(num_col)+""",'static/images','"""+image_extension+"""')">
+
+
+<a-scene>
+
+  <a-assets>
+    <img id='arrow-thumb' crossorigin='anonymous' src='static/arrow.png'>
+    <img id='this-image' crossorigin='anonymous' >
+
+    <audio id='click-sound' crossorigin='anonymous' src='https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.ogg'></audio>
+
+    <!-- Image link template to be reused. -->
+    <script id='link' type='text/html'>
+      <a-entity class='link'
+        geometry='primitive: plane; height: 0.5; width: 1'
+        material='shader: flat; src: ${thumb}; alphaTest: 0.5; opacity: 0.6'
+        event-set__1='_event: mousedown; scale: 1 1 1'
+        event-set__2='_event: mouseup; scale: 1.2 1.2 1'
+        event-set__3='_event: mouseenter; scale: 1.2 1.2 1'
+        event-set__4='_event: mouseleave; scale: 1 1 1'
+        set-image='on: click; target: #image-current; src: ${src}'
+        sound='on: click; src: #click-sound'></a-entity>
+    </script>
+  </a-assets>
+
+<a-sky id='image-current' src='#this-image'></a-sky>
+
+<!-- Image links. -->
+ <a-entity id='goRightLink' layout='type: line; margin: 1.5' position='6 -1.2 0' rotation='0 270 0' scale='' visible='visible'>
+  <a-entity template='src: #link' data-src='#arrow-right' data-thumb='#arrow-thumb'  >
+      <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-right' sound='on: click; src: #click-sound'  ></a-entity>
+  </a-entity>
+</a-entity>
+<a-entity id='goLeftLink' layout='type: line; margin: 1.5' position='-6 -1.2 0' rotation='0 90 0' scale='' visible=''>
+    <a-entity template='src: #link' data-src='#arrow-left' data-thumb='#arrow-thumb'  >
+        <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-left' sound='on: click; src: #click-sound'  ></a-entity>
+    </a-entity>
+  </a-entity>
+  <a-entity id='goForwardLink' layout='type: line; margin: 1.5' position='0 -1.2 -6' rotation='0 0 0' visible='' scale=''>
+    <a-entity template='src: #link' data-src='#arrow-forward' data-thumb='#arrow-thumb'  >
+        <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-forward' sound='on: click; src: #click-sound'  ></a-entity>
+    </a-entity>
+  </a-entity>
+  <a-entity id='goBackwardLink' layout='type: line; margin: 1.5' position='0 -1.2 6' rotation='0 180 0' visible='visible' scale=''>
+    <a-entity template='src: #link' data-src='#arrow-backward' data-thumb='#arrow-thumb'  >
+        <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-backward' sound='on: click; src: #click-sound'  ></a-entity>
+    </a-entity>
+  </a-entity>
+<a-entity camera='' look-controls='' id='camera'  >
+    <a-cursor id='cursor' animation__click='property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150' animation__fusing='property: fusing; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500' event-set__1='_event: mouseenter; color: springgreen' event-set__2='_event: mouseleave; color: black' fuse='true' raycaster='objects: .link'   material='' line='' cursor='' geometry=''></a-cursor>
+</a-entity>
+</a-scene>
+
+</body>
+</html>
+    
+  """
+
+    f.write(message)
+    f.close()
+
+
+def generate_package_web_tour(file_path, title, num_rows, num_col, is_test):
+
+    # Generate a unique session identifier
+    session_identifier = uuid.uuid4()
+
+    # Create a local folder with this unique session identifier
+    session_dir = os.path.join(dirname(os.getcwd()), 'session', str(session_identifier))
+    os.makedirs(os.path.join(session_dir), exist_ok=True)
+
+    # Extract files to the session identifier directory
+    extracted_images_path = extract_files(file_path, session_dir)
+    print('extracted_images_path = ', extracted_images_path)
+
+    # Get the image file extension
+    image_extension = get_file_extension(session_dir)
+    print('extension=', image_extension)
+
+    # Delete files if created for testing or invalid image input
+    if is_test or image_extension is None:
+        shutil.rmtree(session_dir)
+
+    # Check if user input is valid
+    validation_result = validate_input(image_extension, num_rows, num_col, extracted_images_path)
+    print('validate result', validation_result)
+
+    if validation_result:
+        rename_images(num_rows, num_col, extracted_images_path, image_extension)
+        generate_index_html(session_dir, title, num_rows, num_col, image_extension.split('.')[1])
 
 
 if __name__ == "__main__":
-    file_path, num_rows, num_col = get_input()
-    validation_result = validate_input(file_path, num_rows, num_col, False)
+    file_path, title, num_rows, num_col = get_input()
+    generate_package_web_tour(file_path, title, num_rows, num_col, False)
