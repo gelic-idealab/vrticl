@@ -97,6 +97,14 @@ def get_file_count(image_extension, full_session_path):
 
 
 def rename_images(grid_row, grid_column, folderPath, image_extension):
+    """
+    Refactor images extracted from zip folder in a sequential manner based on the grid rows and columns
+    :param grid_row: number of rows input by user
+    :param grid_column: number of columns input by user
+    :param folderPath: directory where the images are stored
+    :param image_extension: type of image (jpg, png)
+    :return:
+    """
     row_counter = 1
     column_counter = 1
     is_incrementing = True
@@ -124,16 +132,8 @@ def rename_images(grid_row, grid_column, folderPath, image_extension):
                     continue
 
 
-def generate_index_html(file_path, title, num_rows, num_col, image_extension):
-    src_files = os.listdir('static')
-    for file_name in src_files:
-        full_file_name = os.path.join('static', file_name)
-        if os.path.isfile(full_file_name):
-            shutil.copy(full_file_name, os.path.join(file_path,'static'))
-
-    f = open(os.path.join(file_path,'index.html'), 'w')
-
-    message = """
+def get_html_string(title, num_rows, num_col, image_extension):
+    return """
     <!DOCTYPE html>
 <html>
 <head>
@@ -208,20 +208,61 @@ def generate_index_html(file_path, title, num_rows, num_col, image_extension):
 
 </body>
 </html>
-    
-  """
+"""
+
+
+def generate_index_html(file_path, title, num_rows, num_col, image_extension):
+    """
+    Generates an aframe HTML with the required parameters
+    :param file_path: session path
+    :param title: title of the html to be generated
+    :param num_rows: number of rows input
+    :param num_col: number of columns input
+    :param image_extension: type of image (jpg, png)
+    :return:
+    """
+    print('current directory = ',os.path.basename(os.getcwd()))
+    if os.path.basename(os.getcwd()) == 'vrticl':
+        src_files = os.listdir(os.path.join(os.getcwd(),'utility','static'))
+    else:
+        src_files = os.listdir(os.path.join(dirname(os.getcwd()),'utility','static'))
+
+    for file_name in src_files:
+        full_file_name = os.path.join('static', file_name)
+        if os.path.isfile(full_file_name):
+            shutil.copy(full_file_name, os.path.join(file_path,'static'))
+
+    f = open(os.path.join(file_path,'index.html'), 'w')
+
+    message = get_html_string(title, num_rows, num_col, image_extension)
 
     f.write(message)
     f.close()
 
 
-def generate_package_web_tour(file_path, title, num_rows, num_col, is_test):
+def generate_package_web_tour(file_path, title, num_rows, num_col):
+    """
+    Makes function calls to generate the package for web tour based on user inputs
+    :param file_path: input file path where the file is present
+    :param title: title of the web tour to be generated
+    :param num_rows: number of rows input by user
+    :param num_col: number of columns input by user
+    :param is_test: flag to indicate if the function is called for testing purpose or not
+    :return:
+    """
+
+    validation_result = False
 
     # Generate a unique session identifier
     session_identifier = uuid.uuid4()
 
     # Create a local folder with this unique session identifier
-    session_dir = os.path.join(dirname(os.getcwd()), 'session', str(session_identifier))
+    if os.path.basename(os.getcwd()) == 'vrticl':
+        session_dir = os.path.join(os.getcwd(),'session',str(session_identifier))
+    else:
+        session_dir = os.path.join(dirname(os.getcwd()), 'session', str(session_identifier))
+
+    # session_dir = os.path.join(dirname(os.getcwd()), 'session', str(session_identifier))
     os.makedirs(os.path.join(session_dir), exist_ok=True)
 
     # Extract files to the session identifier directory
@@ -232,19 +273,25 @@ def generate_package_web_tour(file_path, title, num_rows, num_col, is_test):
     image_extension = get_file_extension(session_dir)
     print('extension=', image_extension)
 
-    # Delete files if created for testing or invalid image input
-    if is_test or image_extension is None:
-        shutil.rmtree(session_dir)
-
     # Check if user input is valid
-    validation_result = validate_input(image_extension, num_rows, num_col, extracted_images_path)
-    print('validate result', validation_result)
+    if image_extension is not None:
+        validation_result = validate_input(image_extension, num_rows, num_col, extracted_images_path)
+        print('validate result', validation_result)
 
-    if validation_result:
-        rename_images(num_rows, num_col, extracted_images_path, image_extension)
-        generate_index_html(session_dir, title, num_rows, num_col, image_extension.split('.')[1])
+        if validation_result:
+            rename_images(num_rows, num_col, extracted_images_path, image_extension)
+            generate_index_html(session_dir, title, num_rows, num_col, image_extension.split('.')[1])
+            return session_identifier
+        else:
+            shutil.rmtree(session_dir)
+            return "There was an error with the input.", session_identifier
+
+    # Delete files if created for testing or invalid image input
+    else:
+        shutil.rmtree(session_dir)
+        return "There was an error with the image files in the zip folder.", session_identifier
 
 
 if __name__ == "__main__":
     file_path, title, num_rows, num_col = get_input()
-    generate_package_web_tour(file_path, title, num_rows, num_col, False)
+    generate_package_web_tour(file_path, title, num_rows, num_col)
