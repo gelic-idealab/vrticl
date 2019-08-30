@@ -140,12 +140,7 @@ def get_html_string(title, num_rows, num_col, image_extension):
 <meta charset='utf-8'>
 <title>"""+title+"""</title>
 <meta name='description' content='360&deg; Image - A-Frame'>
-<!--<script src='https://aframe.io/releases/0.8.0/aframe.min.js'></script>-->
 <script src='https://aframe.io/releases/0.9.2/aframe.min.js'></script>
-<!--<script src='https://npmcdn.com/aframe-animation-component@3.0.1'></script>-->
-<script src='https://npmcdn.com/aframe-event-set-component@3.0.1'></script>
-<!--<script src='https://npmcdn.com/aframe-layout-component@3.0.1'></script>-->
-<script src='https://npmcdn.com/aframe-template-component@3.1.1'></script>
 <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
 <script src='static/assignImageObject.js' type='text/javascript'></script>
 <script src='static/setImage.js' type='text/javascript'></script>
@@ -201,9 +196,9 @@ def get_html_string(title, num_rows, num_col, image_extension):
         <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-backward' sound='on: click; src: #click-sound'  ></a-entity>
     </a-entity>
   </a-entity>
-<a-entity camera='' look-controls='' id='camera'  >
-    <a-cursor id='cursor' animation__click='property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150' animation__fusing='property: fusing; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500' event-set__1='_event: mouseenter; color: springgreen' event-set__2='_event: mouseleave; color: black' fuse='true' raycaster='objects: .link'   material='' line='' cursor='' geometry=''></a-cursor>
-</a-entity>
+<a-camera>
+    <a-cursor id='cursor' event-set__1='_event: mouseenter; color: springgreen' event-set__2='_event: mouseleave; color: black' fuse='true' raycaster='objects: .link'   material='' line='' cursor='' geometry=''></a-cursor>
+  </a-camera>
 </a-scene>
 
 </body>

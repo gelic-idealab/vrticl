@@ -9,8 +9,6 @@ AFRAME.registerComponent('set-image', {
         var data = this.data;
         var el = this.el;
 
-        this.setupFadeAnimation();
-
         if(current.right == null)document.querySelector('#goRightLink').setAttribute("visible", false);
         else document.getElementById('goRightLink').setAttribute("visible", true);
         if(current.left == null) document.getElementById('goLeftLink').setAttribute("visible", false);
@@ -45,25 +43,6 @@ AFRAME.registerComponent('set-image', {
 
                 }, data.dur);
             }
-        });
-      },
-
-      setupFadeAnimation: function () {
-        var data = this.data;
-        var targetEl = this.data.target;
-
-        // Only set up once.
-        if (targetEl.dataset.setImageFadeSetup) { return; }
-        targetEl.dataset.setImageFadeSetup = true;
-
-        // Create animation.
-        targetEl.setAttribute('animation__fade', {
-          property: 'material.color',
-          startEvents: 'set-image-fade',
-          dir: 'alternate',
-          dur: data.dur,
-          from: '#FFF',
-          to: '#000'
         });
       }
     });
