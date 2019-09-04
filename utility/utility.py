@@ -276,7 +276,8 @@ def generate_package_web_tour(file_path, title, num_rows, num_col):
         if validation_result:
             rename_images(num_rows, num_col, extracted_images_path, image_extension)
             generate_index_html(session_dir, title, num_rows, num_col, image_extension.split('.')[1])
-            return session_identifier
+            shutil.make_archive(session_dir, 'zip', session_dir)
+            return '', session_identifier
         else:
             shutil.rmtree(session_dir)
             return "There was an error with the input.", session_identifier
@@ -289,4 +290,4 @@ def generate_package_web_tour(file_path, title, num_rows, num_col):
 
 if __name__ == "__main__":
     file_path, title, num_rows, num_col = get_input()
-    generate_package_web_tour(file_path, title, num_rows, num_col)
+    message, session_identifier = generate_package_web_tour(file_path, title, num_rows, num_col)
