@@ -9,7 +9,7 @@ def get_input():
     Fetch input from command line. Requests user input for number of rows, columns and zip file path.
     :return:
     """
-    # C:\Users\gaura\OneDrive\Desktop\Grainger\vrticl_issues\vrticl\tests\images_with_directory.zip
+    # C:\Users\gaura\OneDrive\Desktop\Grainger\vrticl_issues\vrticl\vrticl\tests\images_with_directory.zip
     file_path = input('Enter the zip file path: ')
     title = input('Enter the title for the web tour: ')
     num_rows = int(input('Enter number of rows: '))
@@ -235,7 +235,7 @@ def generate_index_html(file_path, title, num_rows, num_col, image_extension):
     f.close()
 
 
-def generate_package_web_tour(file_path, title, num_rows, num_col):
+def generate_package_web_tour(file_path, title, num_rows, num_col, package_path):
     """
     Makes function calls to generate the package for web tour based on user inputs
     :param file_path: input file path where the file is present
@@ -252,10 +252,11 @@ def generate_package_web_tour(file_path, title, num_rows, num_col):
     session_identifier = uuid.uuid4()
 
     # Create a local folder with this unique session identifier
-    if os.path.basename(os.getcwd()) == 'vrticl':
-        session_dir = os.path.join(os.getcwd(),'session',str(session_identifier))
-    else:
-        session_dir = os.path.join(dirname(os.getcwd()), 'session', str(session_identifier))
+    if package_path == 'default':
+        if os.path.basename(os.getcwd()) == 'vrticl':
+            session_dir = os.path.join(os.getcwd(),'session',str(session_identifier))
+        else:
+            session_dir = os.path.join(dirname(os.getcwd()), 'session', str(session_identifier))
 
     # session_dir = os.path.join(dirname(os.getcwd()), 'session', str(session_identifier))
     os.makedirs(os.path.join(session_dir), exist_ok=True)
@@ -290,4 +291,4 @@ def generate_package_web_tour(file_path, title, num_rows, num_col):
 
 if __name__ == "__main__":
     file_path, title, num_rows, num_col = get_input()
-    message, session_identifier = generate_package_web_tour(file_path, title, num_rows, num_col)
+    message, session_identifier = generate_package_web_tour(file_path, title, num_rows, num_col, 'default')
