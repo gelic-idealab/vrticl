@@ -1,3 +1,3 @@
 FROM python:3.7
-ADD utility/utility.py /
+ADD vrticl/utility /
 CMD [ "python", "./utility.py" ]
