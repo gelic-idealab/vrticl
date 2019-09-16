@@ -254,7 +254,11 @@ def generate_package_web_tour(file_path, title, num_rows, num_col, package_path)
     # Create a local folder with this unique session identifier
     if package_path == 'default':
         if os.path.basename(os.getcwd()) == 'vrticl':
+<<<<<<< HEAD:vrticl/utility/utility.py
             session_dir = os.path.join(os.getcwd(),'session',str(session_identifier))
+=======
+            session_dir = os.path.join(os.getcwd(), 'session', str(session_identifier))
+>>>>>>> feature/Update:utility/utility.py
         else:
             session_dir = os.path.join(dirname(os.getcwd()), 'session', str(session_identifier))
 
