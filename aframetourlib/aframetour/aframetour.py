@@ -4,19 +4,6 @@ import shutil, uuid, pathlib, glob, os
 from os.path import dirname
 
 
-def get_input():
-    """
-    Fetch input from command line. Requests user input for number of rows, columns and zip file path.
-    :return:
-    """
-    # C:\Users\gaura\OneDrive\Desktop\Grainger\vrticl_issues\vrticl\vrticl\tests\images_with_directory.zip
-    file_path = input('Enter the zip file path: ')
-    title = input('Enter the title for the web tour: ')
-    num_rows = int(input('Enter number of rows: '))
-    num_col = int(input('Enter number of columns: '))
-    return file_path, title, num_rows, num_col
-
-
 def validate_input(image_extension, num_rows, num_columns, session_dir):
     """
     Calls methods to extract files from the zip folder, gets the file count, matches with user input and returns a boolean.
@@ -70,7 +57,7 @@ def get_file_extension(full_session_path):
     :return: Returns a string value with image type as jpg, png and so on.
     """
     image_type=''
-    for root, dirs, files in os.walk(full_session_path):
+    for _, _, files in os.walk(full_session_path):
         for filename in files:
             if filename.endswith('.jpg'):
                 image_type = 'jpg'
@@ -109,9 +96,7 @@ def rename_images(grid_row, grid_column, folderPath, image_extension):
     column_counter = 1
     is_incrementing = True
     for pathAndFilename in glob.iglob(os.path.join(folderPath, image_extension)):
-        title, ext = os.path.splitext(os.path.basename(pathAndFilename))
-        # print('path and file name',pathAndFilename)
-        # print('Test title and ext',title, ext)
+        _, ext = os.path.splitext(os.path.basename(pathAndFilename))
         if row_counter <= int(grid_row):
             if column_counter <= int(grid_column):
                 os.rename(pathAndFilename,
@@ -206,7 +191,7 @@ def get_html_string(title, num_rows, num_col, image_extension):
 """
 
 
-def generate_index_html(file_path, title, num_rows, num_col, image_extension):
+def generate_index_html(file_path, title, num_rows, num_col, image_extension, session_dir):
     """
     Generates an aframe HTML with the required parameters
     :param file_path: session path
@@ -217,10 +202,7 @@ def generate_index_html(file_path, title, num_rows, num_col, image_extension):
     :return:
     """
     print('current directory = ',os.path.basename(os.getcwd()))
-    if os.path.basename(os.getcwd()) == 'vrticl':
-        src_files = os.listdir(os.path.join(os.getcwd(),'utility','static'))
-    else:
-        src_files = os.listdir(os.path.join(dirname(os.getcwd()),'utility','static'))
+    src_files = os.listdir(os.path.join(session_dir, 'static'))
 
     for file_name in src_files:
         full_file_name = os.path.join('static', file_name)
@@ -257,7 +239,6 @@ def generate_package_web_tour(file_path, title, num_rows, num_col, package_path)
     else:
         session_dir = os.path.join(package_path, str(session_identifier))
 
-    # session_dir = os.path.join(dirname(os.getcwd()), 'session', str(session_identifier))
     os.makedirs(os.path.join(session_dir), exist_ok=True)
 
     # Extract files to the session identifier directory
@@ -275,7 +256,7 @@ def generate_package_web_tour(file_path, title, num_rows, num_col, package_path)
 
         if validation_result:
             rename_images(num_rows, num_col, extracted_images_path, image_extension)
-            generate_index_html(session_dir, title, num_rows, num_col, image_extension.split('.')[1])
+            generate_index_html(session_dir, title, num_rows, num_col, image_extension.split('.')[1], session_dir)
             shutil.make_archive(session_dir, 'zip', session_dir)
             return '', session_identifier
         else:
@@ -286,8 +267,3 @@ def generate_package_web_tour(file_path, title, num_rows, num_col, package_path)
     else:
         shutil.rmtree(session_dir)
         return "There was an error with the image files in the zip folder.", session_identifier
-
-
-if __name__ == "__main__":
-    file_path, title, num_rows, num_col = get_input()
-    message, session_identifier = generate_package_web_tour(file_path, title, num_rows, num_col, 'default')
