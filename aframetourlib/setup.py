@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name='aframetour',
   packages=['aframetour'],
-  version='0.1.2',
+  version='0.1.4',
   license='MIT',
   description='This library generates a web vr tour for a given zip file and grid size',
   author='Gaurav Dharra, Rob Wallace',

@@ -2,6 +2,7 @@ import fnmatch
 import zipfile
 import shutil, uuid, pathlib, glob, os
 from os.path import dirname
+import requests
 
 
 def validate_input(image_extension, num_rows, num_columns, session_dir):
@@ -189,6 +190,15 @@ def get_html_string(title, num_rows, num_col, image_extension):
 </body>
 </html>
 """
+def get_static_assets():
+    if not os.path.exists('static_assets'):
+        static_zip_location = 'https://github.com/Grainger-Engineering-Library/vrticl/raw/master/aframetourlib/aframetour/static.zip'
+        static_zip = requests.get(static_zip_location)
+        with open('static.zip', 'wb') as f:
+            f.write(static_zip.content)
+        with zipfile.ZipFile('static.zip', 'r') as zf:
+            zf.extractall('static_assets')
+        return True
 
 
 def generate_index_html(file_path, title, num_rows, num_col, image_extension, session_dir):
@@ -202,12 +212,10 @@ def generate_index_html(file_path, title, num_rows, num_col, image_extension, se
     :return:
     """
     print('current directory = ',os.path.basename(os.getcwd()))
-    src_files = os.listdir(os.path.join(session_dir, 'static'))
+    src_files = os.listdir(os.path.join('static_assets', 'static'))
 
     for file_name in src_files:
-        full_file_name = os.path.join('static', file_name)
-        if os.path.isfile(full_file_name):
-            shutil.copy(full_file_name, os.path.join(file_path,'static'))
+        shutil.copy(os.path.join('static_assets', 'static', file_name), os.path.join(file_path,'static'))
 
     f = open(os.path.join(file_path,'index.html'), 'w')
 
@@ -227,6 +235,8 @@ def generate_package_web_tour(file_path, title, num_rows, num_col, package_path)
     :param is_test: flag to indicate if the function is called for testing purpose or not
     :return:
     """
+
+    get_static_assets()
 
     validation_result = False
 
@@ -267,3 +277,4 @@ def generate_package_web_tour(file_path, title, num_rows, num_col, package_path)
     else:
         shutil.rmtree(session_dir)
         return "There was an error with the image files in the zip folder.", session_identifier
+
