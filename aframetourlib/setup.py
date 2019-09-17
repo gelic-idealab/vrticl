@@ -1,12 +1,8 @@
 from distutils.core import setup
 setup(
-  name='vrticl',
-  packages=['vrticl'],
-<<<<<<< HEAD
-  version='0.3',
-=======
-  version='0.7',
->>>>>>> feature/Update
+  name='aframetour',
+  packages=['aframetour'],
+  version='0.1.2',
   license='MIT',
   description='This library generates a web vr tour for a given zip file and grid size',
   author='Gaurav Dharra, Rob Wallace',
