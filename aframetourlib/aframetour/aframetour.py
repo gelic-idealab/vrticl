@@ -143,7 +143,7 @@ def get_html_string(title, num_rows, num_col, image_extension):
     <img id='arrow-thumb' crossorigin='anonymous' src='static/arrow.png'>
     <img id='this-image' crossorigin='anonymous' >
 
-    <audio id='click-sound' crossorigin='anonymous' src='https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.ogg'></audio>
+    <audio id='click-sound' crossorigin='anonymous' src='static/click.ogg'></audio>
 
     <!-- Image link template to be reused. -->
     <script id='link' type='text/html'>
