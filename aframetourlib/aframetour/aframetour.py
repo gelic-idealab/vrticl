@@ -119,77 +119,92 @@ def rename_images(grid_row, grid_column, folderPath, image_extension):
 
 
 def get_html_string(title, num_rows, num_col, image_extension):
-    return """
-    <!DOCTYPE html>
-<html>
-<head>
-<meta charset='utf-8'>
-<title>"""+title+"""</title>
-<meta name='description' content='360&deg; Image - A-Frame'>
-<script src='https://aframe.io/releases/0.9.2/aframe.min.js'></script>
-<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
-<script src='static/assignImageObject.js' type='text/javascript'></script>
-<script src='static/setImage.js' type='text/javascript'></script>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    return """<!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset='utf-8'>
+    <title>"""+title+"""</title>
+    <meta name='description' content='360&deg; Image - A-Frame'>
+    <script src='https://aframe.io/releases/0.9.2/aframe.min.js'></script>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+    <script src='static/assignImageObject.js' type='text/javascript'></script>
+    <script src='static/setImage.js' type='text/javascript'></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-</head>
-<body onload="loadImages("""+str(num_rows)+""","""+str(num_col)+""",'static/images','"""+image_extension+"""')">
+    </head>
+    <body onload="loadImages("""+str(num_rows)+""","""+str(num_col)+""",'static/images','"""+image_extension+"""')">
 
 
-<a-scene>
+    <a-scene>
 
-  <a-assets id='preloaded'>
-    <img id='arrow-thumb' crossorigin='anonymous' src='static/arrow.png'>
-    <img id='this-image' crossorigin='anonymous' >
+    <a-assets id='preloaded'>
+        <img id='arrow-thumb' crossorigin='anonymous' src='static/arrow.png'>
+        <img id='this-image' crossorigin='anonymous' >
 
-    <audio id='click-sound' crossorigin='anonymous' src='static/click.ogg'></audio>
+        <audio id='click-sound' crossorigin='anonymous' src='static/click.ogg'></audio>
 
-    <!-- Image link template to be reused. -->
-    <script id='link' type='text/html'>
-      <a-entity class='link'
-        geometry='primitive: plane; height: 0.5; width: 1'
-        material='shader: flat; src: ${thumb}; alphaTest: 0.5; opacity: 0.6'
-        event-set__1='_event: mousedown; scale: 1 1 1'
-        event-set__2='_event: mouseup; scale: 1.2 1.2 1'
-        event-set__3='_event: mouseenter; scale: 1.2 1.2 1'
-        event-set__4='_event: mouseleave; scale: 1 1 1'
-        set-image='on: click; target: #image-current; src: ${src}'
-        sound='on: click; src: #click-sound'></a-entity>
-    </script>
-  </a-assets>
+        <!-- Image link template to be reused. -->
+        <script id='link' type='text/html'>
+        <a-entity class='link'
+            geometry='primitive: plane; height: 0.5; width: 1'
+            material='shader: flat; src: ${thumb}; alphaTest: 0.5; opacity: 0.6'
+            event-set__1='_event: mousedown; scale: 1 1 1'
+            event-set__2='_event: mouseup; scale: 1.2 1.2 1'
+            event-set__3='_event: mouseenter; scale: 1.2 1.2 1'
+            event-set__4='_event: mouseleave; scale: 1 1 1'
+            set-image='on: click; target: #image-current; src: ${src}'
+            sound='on: click; src: #click-sound'></a-entity>
+        </script>
+    </a-assets>
 
-<a-sky id='image-current' src='#this-image'></a-sky>
+    <a-sky id='image-current' src='#this-image'></a-sky>
 
-<!-- Image links. -->
- <a-entity id='goRightLink' layout='type: line; margin: 1.5' position='6 -1.2 0' rotation='0 270 0' scale='' visible='visible'>
-  <a-entity template='src: #link' data-src='#arrow-right' data-thumb='#arrow-thumb'  >
-      <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-right' sound='on: click; src: #click-sound'  ></a-entity>
-  </a-entity>
-</a-entity>
-<a-entity id='goLeftLink' layout='type: line; margin: 1.5' position='-6 -1.2 0' rotation='0 90 0' scale='' visible=''>
-    <a-entity template='src: #link' data-src='#arrow-left' data-thumb='#arrow-thumb'  >
-        <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-left' sound='on: click; src: #click-sound'  ></a-entity>
+    <!-- Image links. -->
+    <a-entity id='goRightLink' layout='type: line; margin: 1.5' position='6 -1.2 0' rotation='0 270 0' scale='' visible='visible'>
+    <a-entity template='src: #link' data-src='#arrow-right' data-thumb='#arrow-thumb'  >
+        <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-right' sound='on: click; src: #click-sound'  ></a-entity>
     </a-entity>
-  </a-entity>
-  <a-entity id='goForwardLink' layout='type: line; margin: 1.5' position='0 -1.2 -6' rotation='0 0 0' visible='' scale=''>
-    <a-entity template='src: #link' data-src='#arrow-forward' data-thumb='#arrow-thumb'  >
-        <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-forward' sound='on: click; src: #click-sound'  ></a-entity>
     </a-entity>
-  </a-entity>
-  <a-entity id='goBackwardLink' layout='type: line; margin: 1.5' position='0 -1.2 6' rotation='0 180 0' visible='visible' scale=''>
-    <a-entity template='src: #link' data-src='#arrow-backward' data-thumb='#arrow-thumb'  >
-        <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-backward' sound='on: click; src: #click-sound'  ></a-entity>
+    <a-entity id='goLeftLink' layout='type: line; margin: 1.5' position='-6 -1.2 0' rotation='0 90 0' scale='' visible=''>
+        <a-entity template='src: #link' data-src='#arrow-left' data-thumb='#arrow-thumb'  >
+            <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-left' sound='on: click; src: #click-sound'  ></a-entity>
+        </a-entity>
     </a-entity>
-  </a-entity>
-<a-camera>
-    <a-cursor id='cursor' event-set__1='_event: mouseenter; color: springgreen' event-set__2='_event: mouseleave; color: black' fuse='true' raycaster='objects: .link'   material='' line='' cursor='' geometry=''></a-cursor>
-  </a-camera>
-</a-scene>
+    <a-entity id='goForwardLink' layout='type: line; margin: 1.5' position='0 -1.2 -6' rotation='0 0 0' visible='' scale=''>
+        <a-entity template='src: #link' data-src='#arrow-forward' data-thumb='#arrow-thumb'  >
+            <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-forward' sound='on: click; src: #click-sound'  ></a-entity>
+        </a-entity>
+    </a-entity>
+    <a-entity id='goBackwardLink' layout='type: line; margin: 1.5' position='0 -1.2 6' rotation='0 180 0' visible='visible' scale=''>
+        <a-entity template='src: #link' data-src='#arrow-backward' data-thumb='#arrow-thumb'  >
+            <a-entity class='link' geometry='primitive: plane; height: 0.5; width: 1' material='shader: flat; src: #arrow-thumb; alphaTest: 0.5; opacity: 0.6' event-set__1='_event: mousedown; scale: 1 1 1' event-set__2='_event: mouseup; scale: 1.2 1.2 1' event-set__3='_event: mouseenter; scale: 1.2 1.2 1' event-set__4='_event: mouseleave; scale: 1 1 1' set-image='on: click; target: #image-current; src: #arrow-backward' sound='on: click; src: #click-sound'  ></a-entity>
+        </a-entity>
+    </a-entity>
 
-</body>
-</html>
-"""
+    <a-entity id="rig" position="25 10 0">
+        <a-entity id="camera" camera look-controls>
+            <a-entity cursor="fuse: true; fuseTimeout: 500"
+                id='cursor' 
+                event-set__1='_event: mouseenter; color: springgreen' 
+                event-set__2='_event: mouseleave; color: black' 
+                fuse='true' 
+                raycaster='objects: .link'
+                position="0 0 -1"
+                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                material="color: black; shader: flat">
+            </a-entity>
+        </a-entity>
+    </a-entity>
+    <!-- <a-camera>
+        <a-cursor id='cursor' event-set__1='_event: mouseenter; color: springgreen' event-set__2='_event: mouseleave; color: black' fuse='true' raycaster='objects: .link'   material='' line='' cursor='' geometry=''></a-cursor>
+    </a-camera> -->
+    </a-scene>
+
+    </body>
+    </html>
+    """
+
 def get_static_assets():
     if not os.path.exists('static_assets'):
         static_zip_location = 'https://github.com/Grainger-Engineering-Library/vrticl/raw/master/aframetourlib/aframetour/static.zip'
@@ -278,3 +293,10 @@ def generate_package_web_tour(file_path, title, num_rows, num_col, package_path)
         shutil.rmtree(session_dir)
         return "There was an error with the image files in the zip folder.", session_identifier
 
+if __name__ == "__main__":
+    # file_path, title, num_rows, num_col = get_input()
+    file_path = 'C:/Users/rwwalla2/Downloads/foellinger.zip'
+    title = 'test'
+    num_rows = 4
+    num_col = 1
+    message, session_identifier = generate_package_web_tour(file_path, title, num_rows, num_col, 'default')
