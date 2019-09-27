@@ -46,6 +46,8 @@ function loadImages(numberOfRows,numberOfColumns,fileLocation,image_type, is_fil
                     row_num = j + 1;
                     right = row_num + '_' + i;
                 }
+                var img_html = "<img id='"+j+"_"+i+"' alt='"+j+"_"+i+"' crossorigin='anonymous' src ="+ img +">"
+                $('#preloaded').append(img_html) 
                 listOfFiles[j + '_' + i] = {img: img, left: left, right: right, backward: backward, forward: forward};
             }
         }

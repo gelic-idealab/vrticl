@@ -139,7 +139,7 @@ def get_html_string(title, num_rows, num_col, image_extension):
 
 <a-scene>
 
-  <a-assets>
+  <a-assets id='preloaded'>
     <img id='arrow-thumb' crossorigin='anonymous' src='static/arrow.png'>
     <img id='this-image' crossorigin='anonymous' >
 
