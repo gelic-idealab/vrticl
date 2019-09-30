@@ -1,8 +1,7 @@
 import fnmatch
 import zipfile
 import shutil, uuid, pathlib, glob, os
-from os.path import dirname
-import requests
+import requests, sys
 
 
 def validate_input(image_extension, num_rows, num_columns, session_dir):
@@ -13,7 +12,7 @@ def validate_input(image_extension, num_rows, num_columns, session_dir):
     :param num_columns:
     :return: A boolean that indicates if the input is valid
     """
-    if image_extension!=None:
+    if image_extension is not None:
         num_images = get_file_count(image_extension, session_dir)
         print('num_images', num_images)
 
@@ -64,9 +63,11 @@ def get_file_extension(full_session_path):
                 image_type = 'jpg'
             elif filename.endswith('.png'):
                 image_type = 'png'
+            elif filename.endswith('.jpeg'):
+                image_type = 'jpeg'
             break
 
-    if image_type=='':
+    if image_type == '':
         return None
     else:
         image_extension = '*.' + image_type
@@ -190,7 +191,13 @@ def get_html_string(title, num_rows, num_col, image_extension):
 </body>
 </html>
 """
+
+
 def get_static_assets():
+    """
+    Method that generates static assets including javascript and image file from static zip folder stored in GitHub.
+    :return:
+    """
     if not os.path.exists('static_assets'):
         static_zip_location = 'https://github.com/Grainger-Engineering-Library/vrticl/raw/master/aframetourlib/aframetour/static.zip'
         static_zip = requests.get(static_zip_location)
@@ -235,46 +242,64 @@ def generate_package_web_tour(file_path, title, num_rows, num_col, package_path)
     :param is_test: flag to indicate if the function is called for testing purpose or not
     :return:
     """
+    try:
+        get_static_assets()
 
-    get_static_assets()
+        image_extension = ''
 
-    validation_result = False
+        # Generate a unique session identifier
+        session_identifier = uuid.uuid4()
 
-    # Generate a unique session identifier
-    session_identifier = uuid.uuid4()
-
-    # Create a local folder with this unique session identifier
-    if package_path == 'default':
-        session_dir = os.path.join('session', str(session_identifier))
-    else:
-        session_dir = os.path.join(package_path, str(session_identifier))
-
-    os.makedirs(os.path.join(session_dir), exist_ok=True)
-
-    # Extract files to the session identifier directory
-    extracted_images_path = extract_files(file_path, session_dir)
-    print('extracted_images_path = ', extracted_images_path)
-
-    # Get the image file extension
-    image_extension = get_file_extension(session_dir)
-    print('extension=', image_extension)
-
-    # Check if user input is valid
-    if image_extension is not None:
-        validation_result = validate_input(image_extension, num_rows, num_col, extracted_images_path)
-        print('validate result', validation_result)
-
-        if validation_result:
-            rename_images(num_rows, num_col, extracted_images_path, image_extension)
-            generate_index_html(session_dir, title, num_rows, num_col, image_extension.split('.')[1], session_dir)
-            shutil.make_archive(session_dir, 'zip', session_dir)
-            return '', session_identifier
+        # Create a local folder with this unique session identifier
+        if package_path == 'default':
+            session_dir = os.path.join('session', str(session_identifier))
         else:
+            session_dir = os.path.join(package_path, str(session_identifier))
+
+        os.makedirs(os.path.join(session_dir), exist_ok=True)
+
+        # Extract files to the session identifier directory
+        extracted_images_path = extract_files(file_path, session_dir)
+        print('extracted_images_path = ', extracted_images_path)
+
+        # Get the image file extension
+        image_extension = get_file_extension(session_dir)
+        print('extension=', image_extension)
+
+        # Check if user input is valid
+        if image_extension is not None:
+            validation_result = validate_input(image_extension, num_rows, num_col, extracted_images_path)
+            print('validate result', validation_result)
+
+            if validation_result:
+                rename_images(num_rows, num_col, extracted_images_path, image_extension)
+                generate_index_html(session_dir, title, num_rows, num_col, image_extension.split('.')[1], session_dir)
+                shutil.make_archive(session_dir, 'zip', session_dir)
+                return '', image_extension.split('.')[1], session_identifier
+            else:
+                raise Exception('There was an error with the entered input grid size. Please check.')
+
+        # Delete files if created for testing or invalid image input
+        else:
+            raise Exception("There was an error with the image files in the zip folder.")
+
+    except Exception as e:
+        if os.path.exists(session_dir):
             shutil.rmtree(session_dir)
-            return "There was an error with the input.", session_identifier
+        return 'There was an error. Please contact the system administrator. \n Error Message = {}'.format(e), \
+               image_extension, session_identifier
 
-    # Delete files if created for testing or invalid image input
-    else:
-        shutil.rmtree(session_dir)
-        return "There was an error with the image files in the zip folder.", session_identifier
 
+# if __name__ == "__main__":
+#     cmd_line_args = sys.argv
+#     print('Number of arguments:', len(cmd_line_args), 'arguments.')
+#     print('Argument List:', str(cmd_line_args))
+#     if len(cmd_line_args) == 5:
+#         title = cmd_line_args[1]
+#         num_rows = int(cmd_line_args[2])
+#         num_col = int(cmd_line_args[3])
+#         file_path = cmd_line_args[4]
+#         message, session_identifier, image_extension = generate_package_web_tour(file_path, title, num_rows, num_col, 'default')
+#         print('Returned Output = {} {} {}'.format(message, session_identifier, image_extension))
+#     else:
+#         print('Invalid Input! Enter input as title, number of rows, number of columns and file path.')

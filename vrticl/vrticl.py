@@ -25,6 +25,7 @@ if __name__ == "__main__":
         num_rows = int(cmd_line_args[2])
         num_col = int(cmd_line_args[3])
         file_path = cmd_line_args[4]
-        message, session_identifier = aft.generate_package_web_tour(file_path, title, num_rows, num_col, 'default')
+        message, image_extension, session_identifier = aft.generate_package_web_tour(file_path, title, num_rows, num_col, 'default')
+        print(message, image_extension, session_identifier)
     else:
         print('Invalid Input! Enter input as title, number of rows, number of columns and file path.')
