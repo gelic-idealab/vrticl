@@ -4,6 +4,9 @@ import shutil, uuid, pathlib, glob, os
 import requests, sys
 
 
+STATIC_ASSETS_REMOTE_PATH = 'https://github.com/Grainger-Engineering-Library/vrticl/raw/master/aframetourlib/aframetour/static.zip'
+
+
 def validate_input(image_extension, num_rows, num_columns, session_dir):
     """
     Calls methods to extract files from the zip folder, gets the file count, matches with user input and returns a boolean.
@@ -199,7 +202,7 @@ def get_static_assets():
     :return:
     """
     if not os.path.exists('static_assets'):
-        static_zip_location = 'https://github.com/Grainger-Engineering-Library/vrticl/raw/master/aframetourlib/aframetour/static.zip'
+        static_zip_location = STATIC_ASSETS_REMOTE_PATH
         static_zip = requests.get(static_zip_location)
         with open('static.zip', 'wb') as f:
             f.write(static_zip.content)
@@ -286,8 +289,7 @@ def generate_package_web_tour(file_path, title, num_rows, num_col, package_path)
     except Exception as e:
         if os.path.exists(session_dir):
             shutil.rmtree(session_dir)
-        return 'There was an error. Please contact the system administrator. \n Error Message = {}'.format(e), \
-               image_extension, session_identifier
+        return str(e), image_extension, session_identifier
 
 
 # if __name__ == "__main__":
