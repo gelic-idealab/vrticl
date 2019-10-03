@@ -163,7 +163,8 @@ def get_html_string(title, num_rows, num_col, image_extension):
     </script>
   </a-assets>
 
-<a-sky id='image-current' src='#this-image'></a-sky>
+<a-sky src='#this-image' id='image-current' animation__fade="property: components.material.material.color; type: color; from: #FFF; to: #000; dur: 500; startEvents: fade"
+  animation__fadeback="property: components.material.material.color; type: color; from: #000; to: #FFF; dur: 500; startEvents: animationcomplete__fade"></a-sky>
 
 <!-- Image links. -->
  <a-entity id='goRightLink' layout='type: line; margin: 1.5' position='6 -1.2 0' rotation='0 270 0' scale='' visible='visible'>
@@ -187,7 +188,11 @@ def get_html_string(title, num_rows, num_col, image_extension):
     </a-entity>
   </a-entity>
 <a-camera>
-    <a-cursor id='cursor' event-set__1='_event: mouseenter; color: springgreen' event-set__2='_event: mouseleave; color: black' fuse='true' raycaster='objects: .link'   material='' line='' cursor='' geometry=''></a-cursor>
+   <a-cursor id='cursor' animation__mouseenter="property: components.material.material.color; type: color; to: green; startEvents: mouseenter; dur: 100";
+
+    animation__mouseleave="property: components.material.material.color; type: color; to: black; startEvents: mouseleave; dur: 100";
+
+    fuse='true' raycaster='objects: .link'   material='' line='' cursor='' geometry=''> 
   </a-camera>
 </a-scene>
 

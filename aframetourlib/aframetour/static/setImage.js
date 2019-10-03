@@ -3,7 +3,7 @@ AFRAME.registerComponent('set-image', {
         on: {type: 'string'},
         target: {type: 'selector'},
         src: {type: 'string'},
-        dur: {type: 'number', default: 800}
+        dur: {type: 'number', default: 500}
       },
       init: function () {
         var data = this.data;
@@ -29,7 +29,7 @@ AFRAME.registerComponent('set-image', {
                 // Wait for fade to complete.
                 setTimeout(function () {
                     // Set image.
-                    data.target.setAttribute('material', 'src', listOfFiles[current[data.src.split('-')[1]]].img);
+                    data.target.setAttribute('material', 'src', "#"+current[data.src.split('-')[1]]);
                     var previous = current;
                     current = listOfFiles[current[data.src.split('-')[1]]];
                     if(current.right == null)document.querySelector('#goRightLink').setAttribute("visible", false);
