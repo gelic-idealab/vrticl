@@ -6,9 +6,11 @@ Command line utility for generating Streetview-style tours from 360 photos. Outp
 * aframetour library
 
 ### Installation
-`git clone https://github.com/Grainger-Engineering-Library/vrticl.git\n`
-`cd vrticl/\n`
-`pip install aframetour\n`
+```
+git clone https://github.com/Grainger-Engineering-Library/vrticl.git
+cd vrticl/
+pip install aframetour
+```
 
 ### Usage
 `python vrticl [title] [rows] [columns] [path/to/images]`
