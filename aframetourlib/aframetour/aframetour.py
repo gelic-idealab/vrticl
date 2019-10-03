@@ -297,16 +297,16 @@ def generate_package_web_tour(file_path, title, num_rows, num_col, package_path)
         return str(e), image_extension, session_identifier
 
 
-# if __name__ == "__main__":
-#     cmd_line_args = sys.argv
-#     print('Number of arguments:', len(cmd_line_args), 'arguments.')
-#     print('Argument List:', str(cmd_line_args))
-#     if len(cmd_line_args) == 5:
-#         title = cmd_line_args[1]
-#         num_rows = int(cmd_line_args[2])
-#         num_col = int(cmd_line_args[3])
-#         file_path = cmd_line_args[4]
-#         message, session_identifier, image_extension = generate_package_web_tour(file_path, title, num_rows, num_col, 'default')
-#         print('Returned Output = {} {} {}'.format(message, session_identifier, image_extension))
-#     else:
-#         print('Invalid Input! Enter input as title, number of rows, number of columns and file path.')
+if __name__ == "__main__":
+    cmd_line_args = sys.argv
+    print('Number of arguments:', len(cmd_line_args), 'arguments.')
+    print('Argument List:', str(cmd_line_args))
+    if len(cmd_line_args) == 5:
+        title = cmd_line_args[1]
+        num_rows = int(cmd_line_args[2])
+        num_col = int(cmd_line_args[3])
+        file_path = cmd_line_args[4]
+        message, session_identifier, image_extension = generate_package_web_tour(file_path, title, num_rows, num_col, 'default')
+        print('Returned Output = {} {} {}'.format(message, session_identifier, image_extension))
+    else:
+        print('Invalid Input! Enter input as title, number of rows, number of columns and file path.')

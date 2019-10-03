@@ -22,7 +22,7 @@ AFRAME.registerComponent('set-image', {
         el.addEventListener(data.on, function () {
             if(current[data.src.split('-')[1]] != null) {
                 // Fade out image.
-                data.target.emit('set-image-fade');
+                data.target.emit('fade');
                 console.log(data);
                 console.log(el);
                 console.log(current);
